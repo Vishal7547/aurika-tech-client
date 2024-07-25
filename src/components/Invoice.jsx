@@ -16,6 +16,13 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import ShortTextIcon from "@mui/icons-material/ShortText";
 import React, { useState } from "react";
 import axios from "axios";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 const Invoice = () => {
@@ -50,10 +57,26 @@ const Invoice = () => {
     image: null,
     reverseCharge: false,
   });
+  const [product, setProduct] = useState({
+    taxRate: "",
+    discount: "",
+    price: "",
+    quantity: "",
+    description: "",
+  });
+  const [productList, setProductList] = useState([]);
   const [image, setImage] = useState(null);
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleProductChange = (e) => {
+    const { name, value } = e.target;
+    setProduct((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -84,7 +107,19 @@ const Invoice = () => {
 
   const handleSubmit = async () => {
     if (validateForm()) {
+      const productInfo = productList.map((p, i) => {
+        return {
+          description: p.description,
+          unit_price: p.price,
+          quantity: p.quantity,
+          discount: p.discount,
+          tax_rate: p.taxRate,
+        };
+      });
+
       const formDataObject = new FormData();
+      formDataObject.append("items", JSON.stringify(productInfo));
+
       formDataObject.append("seller_name", formData.sellerName);
       formDataObject.append("seller_address", formData.sellerAddress);
       formDataObject.append("seller_city", formData.sellerCity);
@@ -177,10 +212,10 @@ const Invoice = () => {
       shippingStateCode: "",
       placeOfDelivery: "",
       orderNo: `ORDER${Date.now()}`,
-      orderDate: dayjs("2022-04-17"),
+      orderDate: dayjs("2024-07-25"),
       invoiceNo: `INVOICE${Date.now()}`,
       invoiceDetails: "",
-      invoiceDate: dayjs("2022-04-17"),
+      invoiceDate: dayjs("2024-07-25"),
       image: null,
 
       reverseCharge: false,
@@ -199,6 +234,26 @@ const Invoice = () => {
     } catch (error) {
       alert("Error downloading image:");
       console.error("Error downloading image:", error);
+    }
+  };
+  const validateProduct = () => {
+    console.log(product);
+    return Object.values(product).every(
+      (value) => value !== "" && value !== null
+    );
+  };
+  const handleProductsSubmit = () => {
+    if (validateProduct()) {
+      setProductList([...productList, product]);
+      setProduct({
+        taxRate: "",
+        discount: "",
+        price: "",
+        quantity: "",
+        description: "",
+      });
+    } else {
+      alert("Please fill in all required fields of products section");
     }
   };
   return (
@@ -521,17 +576,6 @@ const Invoice = () => {
           />
         </Grid>
         <Grid item xs={6}>
-          {/* <TextField
-            id="filled-basic"
-            required
-            name="orderDate"
-            value={formData?.orderDate}
-            onChange={handleInputChange}
-            label="Order Date"
-            variant="filled"
-            fullWidth
-          /> */}
-
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DemoContainer
               components={["DatePicker", "DatePicker", "DatePicker"]}
@@ -583,17 +627,6 @@ const Invoice = () => {
           />
         </Grid>
         <Grid item xs={4}>
-          {/* <TextField
-            id="filled-basic"
-            label="Invoice Date"
-            required
-            name="invoiceDate"
-            value={formData?.invoiceDate}
-            onChange={handleInputChange}
-            variant="filled"
-            fullWidth
-          /> */}
-
           <LocalizationProvider dateAdapter={AdapterDayjs} variant="filled">
             <DemoContainer
               components={["DatePicker", "DatePicker", "DatePicker"]}
@@ -613,6 +646,120 @@ const Invoice = () => {
           </LocalizationProvider>
         </Grid>
       </Grid>
+      {/* Products */}
+      <Box padding={1}>
+        <Typography variant="h4">Products</Typography>
+      </Box>
+      <Grid container spacing={1}>
+        <Grid item xs={4}>
+          <TextField
+            id="filled-basic"
+            required
+            label="description"
+            name="description"
+            value={product?.description}
+            onChange={handleProductChange}
+            variant="filled"
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <TextField
+            id="filled-basic"
+            label="Quantity"
+            required
+            name="quantity"
+            value={product?.quantity}
+            onChange={handleProductChange}
+            variant="filled"
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <TextField
+            id="filled-basic"
+            label="Price"
+            required
+            name="price"
+            value={product?.price}
+            onChange={handleProductChange}
+            variant="filled"
+            fullWidth
+          />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={1} marginTop={1}>
+        <Grid item xs={4}>
+          <TextField
+            id="filled-basic"
+            required
+            label="Discount"
+            name="discount"
+            value={product?.discount}
+            onChange={handleProductChange}
+            variant="filled"
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <TextField
+            id="filled-basic"
+            label="Tax rate"
+            required
+            name="taxRate"
+            value={product?.taxRate}
+            onChange={handleProductChange}
+            variant="filled"
+            fullWidth
+          />
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={1} marginTop={1}>
+        <Grid item>
+          <Button variant="contained" onClick={handleProductsSubmit}>
+            Add Product
+          </Button>
+        </Grid>
+      </Grid>
+      {productList.length > 0 && (
+        <Grid container spacing={1} marginTop={2}>
+          <Grid item xs={12}>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>S.NO</TableCell>
+                    <TableCell align="left">Description</TableCell>
+                    <TableCell align="left">Price</TableCell>
+                    <TableCell align="left">Quantity</TableCell>
+                    <TableCell align="left">Discount</TableCell>
+                    <TableCell align="left">Tax Rate</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {productList.map((p, i) => (
+                    <TableRow
+                      key={i}
+                      sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    >
+                      <TableCell component="th" scope="row">
+                        {i + 1}
+                      </TableCell>
+                      <TableCell align="left">{p.description}</TableCell>
+                      <TableCell align="left">₹{p.price}</TableCell>
+                      <TableCell align="left">{p.quantity}</TableCell>
+                      <TableCell align="left">{p.discount}</TableCell>
+                      <TableCell align="left">{p.taxRate}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+        </Grid>
+      )}
 
       {/* Signature Upload */}
       <Box padding={1}>

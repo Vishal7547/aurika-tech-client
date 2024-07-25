@@ -3,7 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import GridViewIcon from "@mui/icons-material/GridView";
 import React from "react";
 
-const Heading = () => {
+const Heading = ({ setIsView }) => {
   return (
     <Box
       display="flex"
@@ -11,10 +11,18 @@ const Heading = () => {
       alignItems="center"
       padding={2}
     >
-      <Button variant="contained" startIcon={<AddIcon />}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setIsView(true)}
+      >
         Generate InVoice
       </Button>
-      <Button variant="contained" startIcon={<GridViewIcon />}>
+      <Button
+        variant="contained"
+        startIcon={<GridViewIcon />}
+        onClick={() => setIsView(false)}
+      >
         View Generate
       </Button>
     </Box>

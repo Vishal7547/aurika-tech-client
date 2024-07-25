@@ -221,6 +221,15 @@ const Invoice = () => {
       reverseCharge: false,
     });
   };
+  const handleResetProduct = () => {
+    setProduct({
+      taxRate: "",
+      discount: "",
+      price: "",
+      quantity: "",
+      description: "",
+    });
+  };
   const downloadImage = async (url) => {
     try {
       const response = await fetch(url);
@@ -245,16 +254,15 @@ const Invoice = () => {
   const handleProductsSubmit = () => {
     if (validateProduct()) {
       setProductList([...productList, product]);
-      setProduct({
-        taxRate: "",
-        discount: "",
-        price: "",
-        quantity: "",
-        description: "",
-      });
+      handleResetProduct();
     } else {
       alert("Please fill in all required fields of products section");
     }
+  };
+  const handleResetAll = () => {
+    handleReset();
+    handleResetProduct();
+    setProductList([]);
   };
   return (
     <Box padding={2}>
@@ -812,7 +820,7 @@ const Invoice = () => {
       </Grid>
 
       <Grid container spacing={1}>
-        <Grid item xs={4}>
+        <Grid item>
           <Button
             type="button"
             variant="contained"
@@ -820,6 +828,16 @@ const Invoice = () => {
             onClick={handleSubmit}
           >
             {loading ? "Loading" : "Generate Invoice"}
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button
+            type="button"
+            variant="contained"
+            size="large"
+            onClick={handleResetAll}
+          >
+            Reset
           </Button>
         </Grid>
       </Grid>
